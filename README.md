@@ -27,7 +27,7 @@ In the `config/services_test.yaml` file of your project:
 ```
 
 Step 3: Configure Messenger
-=============
+===========================
 Copying `config/packages/dev/messenger.yaml` and pasting that into `config/packages/test/`. This gives us messenger configuration that will only be used in the test environment. Uncomment the code, and replace sync with in-memory. Do that for both of the transports.
 
 ```yaml
