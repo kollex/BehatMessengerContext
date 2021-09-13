@@ -50,7 +50,9 @@ Go to `behat.yml`
 ```yaml
 ...
   contexts:
-    - BehatMessengerContext\Context\MessengerContext
+    - BehatMessengerContext\Context\MessengerContext:
+        placeholderPatternMap:
+          'datetime_atom': '/\d{4}-(0[1-9]|1[0-2])-(0[1-9]|[1-2]\d|3[0-1])T[0-2]\d:[0-5]\d:[0-5]\d[+-][0-2]\d:[0-5]\d/'
 ...
 ```
 
