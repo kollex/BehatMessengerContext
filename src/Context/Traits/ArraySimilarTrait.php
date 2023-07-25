@@ -7,9 +7,9 @@ namespace BehatMessengerContext\Context\Traits;
 trait ArraySimilarTrait
 {
     /**
-     * @param array<mixed>  $expected
-     * @param array<mixed>  $actual
-     * @param array<string> $variableFields
+     * @param array<mixed>          $expected
+     * @param array<mixed>          $actual
+     * @param array<string>         $variableFields
      * @param array<string, string> $placeholderPatternMap
      */
     protected function isArraysSimilar(
@@ -23,30 +23,30 @@ trait ArraySimilarTrait
         }
 
         foreach ($expected as $key => $value) {
-            if (!isset($actual[$key]) && $value !== null) {
+            if (!isset($actual[$key]) && null !== $value) {
                 return false;
             }
 
-            if (gettype($value) !== gettype($actual[$key]) && !in_array($key, $variableFields)) {
+            if (\gettype($value) !== \gettype($actual[$key]) && !\in_array($key, $variableFields)) {
                 return false;
             }
 
-            if (is_array($value)) {
+            if (\is_array($value)) {
                 if (!$this->isArraysSimilar($value, $actual[$key], $variableFields, $placeholderPatternMap)) {
                     return false;
                 }
-            } elseif (!in_array($key, $variableFields, true) && ($actual[$key] !== $value)) {
+            } elseif (!\in_array($key, $variableFields, true) && ($actual[$key] !== $value)) {
                 return false;
-            } elseif (in_array($key, $variableFields, true)) {
-                if (!is_string($value)) {
+            } elseif (\in_array($key, $variableFields, true)) {
+                if (!\is_string($value)) {
                     return false;
                 }
 
                 $isPlaceholder = !empty($placeholderPatternMap)
-                    && strpos($value, '{') === 0
-                    && \substr($value, -1) === '}';
+                    && str_starts_with($value, '{')
+                    && str_ends_with($value, '}');
 
-                if (strpos($value, '~') !== 0 && !$isPlaceholder) {
+                if (!str_starts_with($value, '~') && !$isPlaceholder) {
                     return false;
                 }
 
@@ -57,7 +57,7 @@ trait ArraySimilarTrait
                     $pattern = $placeholderPatternMap[$placeholder];
                 }
 
-                if (!preg_match($pattern, $actual[$key])) {
+                if (!preg_match($pattern, (string)$actual[$key])) {// @phpstan-ignore
                     return false;
                 }
             }

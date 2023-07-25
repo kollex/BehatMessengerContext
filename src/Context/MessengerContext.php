@@ -4,12 +4,12 @@ declare(strict_types=1);
 
 namespace BehatMessengerContext\Context;
 
-use BehatMessengerContext\Context\Traits\ArraySimilarTrait;
 use Behat\Behat\Context\Context;
 use Behat\Gherkin\Node\PyStringNode;
+use BehatMessengerContext\Context\Traits\ArraySimilarTrait;
 use Exception;
 use Symfony\Component\DependencyInjection\ContainerInterface;
-use Symfony\Component\Messenger\Transport\InMemoryTransport;
+use Symfony\Component\Messenger\Transport\InMemory\InMemoryTransport;
 use Symfony\Component\Messenger\Transport\TransportInterface;
 use Symfony\Component\Serializer\Normalizer\NormalizerInterface;
 use Zenstruck\Messenger\Test\Transport\TestTransport;
@@ -24,8 +24,6 @@ class MessengerContext implements Context
     private array $placeholderPatternMap;
 
     /**
-     * @param ContainerInterface $container
-     * @param NormalizerInterface $normalizer
      * @param array<string, string> $placeholderPatternMap
      */
     public function __construct(
@@ -157,7 +155,7 @@ class MessengerContext implements Context
      */
     public function thereIsCountMessagesInTransport(int $expectedMessageCount, string $transportName): void
     {
-        $actualMessageCount = count($this->getEnvelopesFromTransport($transportName));
+        $actualMessageCount = \count($this->getEnvelopesFromTransport($transportName));
 
         if ($actualMessageCount !== $expectedMessageCount) {
             throw new Exception(
@@ -172,6 +170,7 @@ class MessengerContext implements Context
 
     /**
      * @param array<mixed> $message
+     *
      * @return string|bool
      */
     private function getPrettyJson(array $message)
@@ -180,12 +179,11 @@ class MessengerContext implements Context
     }
 
     /**
-     * @param mixed $object
      * @return array<mixed>
      */
     private function convertToArray($object): array
     {
-        return (array) $this->normalizer->normalize($object);
+        return (array)$this->normalizer->normalize($object);
     }
 
     /**
@@ -216,12 +214,13 @@ class MessengerContext implements Context
         throw new Exception('Unknown transport ' . $transportName);
     }
 
+
     private function getMessengerTransportByName(string $transportName): TransportInterface
     {
         $fullName = 'messenger.transport.' . $transportName;
         $hasTransport = $this->container->has($fullName);
 
-        if ($hasTransport === false) {
+        if (false === $hasTransport) {
             throw new Exception('Transport ' . $fullName . ' not found');
         }
 
@@ -232,6 +231,7 @@ class MessengerContext implements Context
         }
 
         if (\class_exists(TestTransport::class) && $transport instanceof TestTransport) {
+            // @phpstan-ignore-next-line-error
             return $transport;
         }
 

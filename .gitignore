@@ -1,6 +1,9 @@
 /vendor/
 /composer.lock
 /build/
-/.phpunit.result.cache
 /package-lock.json
 /node_modules/
+/.phpunit.cache/
+/.build/
+/clover.xml
+/.php-cs-fixer.cache

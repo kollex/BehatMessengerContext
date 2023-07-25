@@ -1,78 +1,63 @@
-name: CI
-
 on:
-    pull_request:
-    push:
-        branches: [ master, develop ]
-
+  push:
+    branches:
+      - main
+      - develop
+  pull_request:
+    branches:
+      - main
+      - develop
+name: CI
 jobs:
-    run:
-        runs-on: ubuntu-18.04
-        strategy:
-            fail-fast: false
-            matrix:
-                php:
-                    - '7.4'
-                    - '8.0'
-                coverage: ['none']
-                symfony-versions:
-                    - '4.4.*'
-                    - '5.1.*'
-                    - '5.2.*'
-                    - '5.3.*'
-                include:
-                    - description: 'Log Code Coverage'
-                      php: '8.0'
-                      coverage: 'xdebug'
-                      symfony-versions: '^5.2'
+  build-and-test:
+    name: Coding Standards and Tests
+    runs-on: ubuntu-20.04
 
-        name: PHP ${{ matrix.php }} Symfony ${{ matrix.symfony-versions }} ${{ matrix.description }}
-        steps:
-            - name: Checkout
-              uses: actions/checkout@v2
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+        with:
+          fetch-depth: 0
 
-            - uses: actions/cache@v2
-              with:
-                  path: ~/.composer/cache/files
-                  key: ${{ matrix.php }}-${{ matrix.symfony-versions }}
+      - name: Install PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          coverage: pcov
+          php-version: 8.2
+          tools: cs2pr,composer:v2
+        env:
+          COMPOSER_AUTH: ${{ secrets.COMPOSER_AUTH }}
 
-            - name: Setup PHP
-              uses: shivammathur/setup-php@v2
-              with:
-                  php-version: ${{ matrix.php }}
-                  coverage: ${{ matrix.coverage }}
+      - name: Get Composer Cache Directory
+        id: composer-cache
+        run: |
+          echo "dir=$(composer config cache-files-dir)" >> $GITHUB_OUTPUT
 
-            - name: Add PHPUnit matcher
-              run: echo "::add-matcher::${{ runner.tool_cache }}/phpunit.json"
+      - name: Cache dependencies
+        uses: actions/cache@v3
+        with:
+          path: ${{ steps.composer-cache.outputs.dir }}
+          key: ${{ runner.os }}-composer-${{ hashFiles('**/composer.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-composer-
 
-            - name: Set composer cache directory
-              id: composer-cache
-              run: echo "::set-output name=dir::$(composer config cache-files-dir)"
+      - name: Install dependencies
+        env:
+          COMPOSER_AUTH: ${{ secrets.COMPOSER_AUTH }}
+        run: |
+          composer install --prefer-dist --optimize-autoloader --ignore-platform-reqs --no-interaction --no-scripts --no-progress
 
-            - name: Cache composer
-              uses: actions/cache@v2.1.2
-              with:
-                  path: ${{ steps.composer-cache.outputs.dir }}
-                  key: ${{ runner.os }}-${{ matrix.php }}-${{ matrix.symfony-versions }}-composer-${{ hashFiles('composer.json') }}
-                  restore-keys: ${{ runner.os }}-${{ matrix.php }}-${{ matrix.symfony-versions }}-composer
+      - name: Run a static analysis with PHPStan
+        run: php vendor/bin/phpstan analyse --error-format=checkstyle | cs2pr
 
-            - name: Install dependencies
-              run: composer require "symfony/symfony:${{ matrix.symfony-versions }}" --no-update
+      - name: Run a code style check with PHPCS
+        run: php vendor/bin/phpcs --report=checkstyle -q | cs2pr
 
-            - name: Install dependencies
-              run: composer install
+      - name: Run a code style check with PHP CS Fixer
+        run: php vendor/bin/php-cs-fixer fix --config=.php-cs-fixer.dist.php --dry-run --format=checkstyle | cs2pr
 
-            - name: Run PHPUnit tests
-              run: vendor/bin/phpunit
-              if: matrix.coverage == 'none'
+      - name: Run a rector
+        run: php vendor/bin/rector --dry-run
 
-            - name: PHPUnit tests and Log Code coverage
-              run: vendor/bin/phpunit --coverage-clover=coverage.xml
-              if: matrix.coverage == 'xdebug'
-
-            - name: Run codecov
-              uses: codecov/codecov-action@v1
-              if: matrix.coverage == 'xdebug'
-              with:
-                  file: './coverage.xml'
-                  fail_ci_if_error: true
+      - name: Run tests with PHPUnit
+        run: php vendor/bin/phpunit --coverage-clover=.build/coverage.xml
