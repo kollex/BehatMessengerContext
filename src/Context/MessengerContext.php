@@ -18,29 +18,23 @@ class MessengerContext implements Context
 {
     use ArraySimilarTrait;
 
-    private ContainerInterface $container;
-    private NormalizerInterface $normalizer;
-    /** @var array<string, string> */
-    private array $placeholderPatternMap;
-
     /**
      * @param array<string, string> $placeholderPatternMap
      */
     public function __construct(
-        ContainerInterface $container,
-        NormalizerInterface $normalizer,
-        array $placeholderPatternMap = []
+        private readonly ContainerInterface $container,
+        private readonly NormalizerInterface $normalizer,
+        private readonly array $placeholderPatternMap = []
     ) {
-        $this->container = $container;
-        $this->normalizer = $normalizer;
-        $this->placeholderPatternMap = $placeholderPatternMap;
     }
 
     /**
      * @Then transport :transportName should contain message with JSON:
      */
-    public function transportShouldContainMessageWithJson(string $transportName, PyStringNode $expectedMessage): void
-    {
+    final public function transportShouldContainMessageWithJson(
+        string $transportName,
+        PyStringNode $expectedMessage
+    ): void {
         $expectedMessage = $this->decodeExpectedJson($expectedMessage);
 
         $actualMessageList = [];
@@ -64,7 +58,7 @@ class MessengerContext implements Context
     /**
      * @Then transport :transportName should contain message with JSON and variable fields :variableFields:
      */
-    public function transportShouldContainMessageWithJsonAndVariableFields(
+    final public function transportShouldContainMessageWithJsonAndVariableFields(
         string $transportName,
         string $variableFields,
         PyStringNode $expectedMessage
@@ -99,8 +93,10 @@ class MessengerContext implements Context
     /**
      * @Then all transport :transportName messages should be JSON:
      */
-    public function allTransportMessagesShouldBeJson(string $transportName, PyStringNode $expectedMessageList): void
-    {
+    final public function allTransportMessagesShouldBeJson(
+        string $transportName,
+        PyStringNode $expectedMessageList
+    ): void {
         $expectedMessageList = $this->decodeExpectedJson($expectedMessageList);
 
         $actualMessageList = [];
@@ -121,7 +117,7 @@ class MessengerContext implements Context
     /**
      * @Then all transport :transportName messages should be JSON with variable fields :variableFields:
      */
-    public function allTransportMessagesShouldBeJsonWithVariableFields(
+    final public function allTransportMessagesShouldBeJsonWithVariableFields(
         string $transportName,
         string $variableFields,
         PyStringNode $expectedMessageList
@@ -153,7 +149,7 @@ class MessengerContext implements Context
     /**
      * @Then there is :expectationMessageCount messages in transport :transportName
      */
-    public function thereIsCountMessagesInTransport(int $expectedMessageCount, string $transportName): void
+    final public function thereIsCountMessagesInTransport(int $expectedMessageCount, string $transportName): void
     {
         $actualMessageCount = \count($this->getEnvelopesFromTransport($transportName));
 
@@ -213,7 +209,6 @@ class MessengerContext implements Context
 
         throw new Exception('Unknown transport ' . $transportName);
     }
-
 
     private function getMessengerTransportByName(string $transportName): TransportInterface
     {
