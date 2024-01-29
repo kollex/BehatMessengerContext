@@ -7,7 +7,7 @@ namespace BehatMessengerContext;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\HttpKernel\Bundle\Bundle;
 
-class BehatMessengerContextBundle extends Bundle
+final class BehatMessengerContextBundle extends Bundle
 {
     public function __construct()
     {

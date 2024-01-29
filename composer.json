@@ -40,7 +40,7 @@
     "phpunit/phpunit": "^10.4",
     "slevomat/coding-standard": "^8.14",
     "squizlabs/php_codesniffer": "^3.6",
-    "rector/rector": "^0.18",
+    "rector/rector": "^0.19",
     "friendsofphp/php-cs-fixer": "^3.39"
   },
   "autoload": {
