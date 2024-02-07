@@ -53,6 +53,12 @@
       "BehatMessengerContext\\Tests\\": "tests"
     }
   },
+  "extra": {
+    "symfony": {
+      "allow-contrib": false,
+      "require": "6.4.*"
+    }
+  },
   "scripts": {
     "test": [
       "composer validate",
