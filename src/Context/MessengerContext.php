@@ -9,7 +9,7 @@ use Behat\Behat\Context\Context;
 use Behat\Gherkin\Node\PyStringNode;
 use Exception;
 use Symfony\Component\DependencyInjection\ContainerInterface;
-use Symfony\Component\Messenger\Transport\InMemoryTransport;
+use Symfony\Component\Messenger\Transport\InMemory\InMemoryTransport;
 use Symfony\Component\Messenger\Transport\TransportInterface;
 use Symfony\Component\Serializer\Normalizer\NormalizerInterface;
 use Zenstruck\Messenger\Test\Transport\TestTransport;

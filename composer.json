@@ -1,6 +1,6 @@
 {
     "name": "macpaw/behat-messenger-context",
-    "type": "library",
+    "type": "symfony-bundle",
     "description": "Behat Context for testing Symfony Messenger component",
     "keywords": [
         "MacPaw",
@@ -26,13 +26,16 @@
     ],
     "license": "MIT",
     "require": {
-        "php": "^7.4 || ^8.0",
+        "php": "^8.2",
         "behat/behat": "^3.0",
-        "symfony/messenger": "^4.4 || ^5.0",
-        "symfony/serializer": "^4.4 || ^5.0"
+        "symfony/messenger": "^6.3 || ^7.0",
+        "symfony/serializer": "^6.3 || ^7.0",
+        "symfony/dependency-injection": "^6.3 || ^7.0",
+        "symfony/http-kernel": "^6.3 || ^7.0",
+        "zenstruck/messenger-test": "^1.9"
     },
     "require-dev": {
-        "phpstan/phpstan": "^0.12",
+        "phpstan/phpstan": "^1.9",
         "phpunit/phpunit": "^9.3",
         "slevomat/coding-standard": "^7.0",
         "squizlabs/php_codesniffer": "^3.6"
@@ -48,7 +51,8 @@
         }
     },
     "scripts": {
-        "phpstan": "./vendor/bin/phpstan analyse -l max",
+        "composer-validate": "composer validate",
+        "phpstan": "./vendor/bin/phpstan analyse",
         "code-style": "./vendor/bin/phpcs",
         "code-style-fix": "./vendor/bin/phpcbf",
         "phpunit": "./vendor/bin/phpunit",
