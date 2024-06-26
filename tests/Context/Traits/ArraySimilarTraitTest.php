@@ -5,40 +5,44 @@ declare(strict_types=1);
 namespace BehatMessengerContext\Tests\Context\Traits;
 
 use BehatMessengerContext\Context\Traits\ArraySimilarTrait;
+use PHPUnit\Framework\Attributes\CoversClass;
+use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\TestCase;
 
-class ArraySimilarTraitTest extends TestCase
+#[CoversClass(ArraySimilarTrait::class)]
+final class ArraySimilarTraitTest extends TestCase
 {
-    private const ATOM_DATETIME_PATTERN = '\d{4}-(0[1-9]|1[0-2])-(0[1-9]|[1-2]\d|3[0-1])T[0-2]\d:[0-5]\d:[0-5]\d[+-][0-2]\d:[0-5]\d';
-
     use ArraySimilarTrait;
+
+    private const ATOM_DATETIME_PATTERN =
+        '\d{4}-(0[1-9]|1[0-2])-(0[1-9]|[1-2]\d|3[0-1])T[0-2]\d:[0-5]\d:[0-5]\d[+-][0-2]\d:[0-5]\d';
 
     public function testSuccess(): void
     {
         $result = $this->isArraysSimilar(['test'], ['test']);
 
-        self::assertTrue($result);
+        $this->assertTrue($result);
     }
 
     public function testEmptyArraySuccess(): void
     {
         $result = $this->isArraysSimilar([], []);
 
-        self::assertTrue($result);
+        $this->assertTrue($result);
     }
 
     public function testFail(): void
     {
         $result = $this->isArraysSimilar([], ['test']);
 
-        self::assertFalse($result);
+        $this->assertFalse($result);
     }
 
     public function testVariableFieldsSuccess(): void
     {
         $result = $this->isArraysSimilar(
             [
-                'time' => '~'.self::ATOM_DATETIME_PATTERN,
+                'time' => '~' . self::ATOM_DATETIME_PATTERN,
                 'foo' => 1,
             ],
             [
@@ -48,12 +52,16 @@ class ArraySimilarTraitTest extends TestCase
             ['time'],
         );
 
-        self::assertTrue($result);
+        $this->assertTrue($result);
     }
 
     /**
-     * @dataProvider variableFieldsFailProvider
+     * @var array<mixed>$expected
+     * @var array<mixed>$actual
+     * @var array<string>$variableFields
+     * @var array<string,string>$actual
      */
+    #[DataProvider('variableFieldsFailProvider')]
     public function testVariableFieldsFail(
         array $expected,
         array $actual,
@@ -62,10 +70,10 @@ class ArraySimilarTraitTest extends TestCase
     ): void {
         $result = $this->isArraysSimilar($expected, $actual, $variableFields, $placeholderPatternMap);
 
-        self::assertFalse($result);
+        $this->assertFalse($result);
     }
 
-    public function variableFieldsFailProvider(): iterable
+    public static function variableFieldsFailProvider(): iterable
     {
         yield '#1: Value type different from string' => [
             ['a' => 1],
@@ -105,9 +113,9 @@ class ArraySimilarTraitTest extends TestCase
             ['date' => '{datetime_atom}'],
             ['date' => (new \DateTimeImmutable())->format(\DateTimeInterface::ATOM)],
             ['date'],
-            ['datetime_atom' => '/'.self::ATOM_DATETIME_PATTERN.'/'],
+            ['datetime_atom' => '/' . self::ATOM_DATETIME_PATTERN . '/'],
         );
 
-        self::assertTrue($result);
+        $this->assertTrue($result);
     }
 }

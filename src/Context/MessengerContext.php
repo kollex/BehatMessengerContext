@@ -4,12 +4,12 @@ declare(strict_types=1);
 
 namespace BehatMessengerContext\Context;
 
-use BehatMessengerContext\Context\Traits\ArraySimilarTrait;
 use Behat\Behat\Context\Context;
 use Behat\Gherkin\Node\PyStringNode;
+use BehatMessengerContext\Context\Traits\ArraySimilarTrait;
 use Exception;
 use Symfony\Component\DependencyInjection\ContainerInterface;
-use Symfony\Component\Messenger\Transport\InMemoryTransport;
+use Symfony\Component\Messenger\Transport\InMemory\InMemoryTransport;
 use Symfony\Component\Messenger\Transport\TransportInterface;
 use Symfony\Component\Serializer\Normalizer\NormalizerInterface;
 use Zenstruck\Messenger\Test\Transport\TestTransport;
@@ -18,31 +18,23 @@ class MessengerContext implements Context
 {
     use ArraySimilarTrait;
 
-    private ContainerInterface $container;
-    private NormalizerInterface $normalizer;
-    /** @var array<string, string> */
-    private array $placeholderPatternMap;
-
     /**
-     * @param ContainerInterface $container
-     * @param NormalizerInterface $normalizer
      * @param array<string, string> $placeholderPatternMap
      */
     public function __construct(
-        ContainerInterface $container,
-        NormalizerInterface $normalizer,
-        array $placeholderPatternMap = []
+        private readonly ContainerInterface $container,
+        private readonly NormalizerInterface $normalizer,
+        private readonly array $placeholderPatternMap = []
     ) {
-        $this->container = $container;
-        $this->normalizer = $normalizer;
-        $this->placeholderPatternMap = $placeholderPatternMap;
     }
 
     /**
      * @Then transport :transportName should contain message with JSON:
      */
-    public function transportShouldContainMessageWithJson(string $transportName, PyStringNode $expectedMessage): void
-    {
+    final public function transportShouldContainMessageWithJson(
+        string $transportName,
+        PyStringNode $expectedMessage
+    ): void {
         $expectedMessage = $this->decodeExpectedJson($expectedMessage);
 
         $actualMessageList = [];
@@ -66,7 +58,7 @@ class MessengerContext implements Context
     /**
      * @Then transport :transportName should contain message with JSON and variable fields :variableFields:
      */
-    public function transportShouldContainMessageWithJsonAndVariableFields(
+    final public function transportShouldContainMessageWithJsonAndVariableFields(
         string $transportName,
         string $variableFields,
         PyStringNode $expectedMessage
@@ -101,8 +93,10 @@ class MessengerContext implements Context
     /**
      * @Then all transport :transportName messages should be JSON:
      */
-    public function allTransportMessagesShouldBeJson(string $transportName, PyStringNode $expectedMessageList): void
-    {
+    final public function allTransportMessagesShouldBeJson(
+        string $transportName,
+        PyStringNode $expectedMessageList
+    ): void {
         $expectedMessageList = $this->decodeExpectedJson($expectedMessageList);
 
         $actualMessageList = [];
@@ -123,7 +117,7 @@ class MessengerContext implements Context
     /**
      * @Then all transport :transportName messages should be JSON with variable fields :variableFields:
      */
-    public function allTransportMessagesShouldBeJsonWithVariableFields(
+    final public function allTransportMessagesShouldBeJsonWithVariableFields(
         string $transportName,
         string $variableFields,
         PyStringNode $expectedMessageList
@@ -155,9 +149,9 @@ class MessengerContext implements Context
     /**
      * @Then there is :expectationMessageCount messages in transport :transportName
      */
-    public function thereIsCountMessagesInTransport(int $expectedMessageCount, string $transportName): void
+    final public function thereIsCountMessagesInTransport(int $expectedMessageCount, string $transportName): void
     {
-        $actualMessageCount = count($this->getEnvelopesFromTransport($transportName));
+        $actualMessageCount = \count($this->getEnvelopesFromTransport($transportName));
 
         if ($actualMessageCount !== $expectedMessageCount) {
             throw new Exception(
@@ -172,6 +166,7 @@ class MessengerContext implements Context
 
     /**
      * @param array<mixed> $message
+     *
      * @return string|bool
      */
     private function getPrettyJson(array $message)
@@ -180,12 +175,11 @@ class MessengerContext implements Context
     }
 
     /**
-     * @param mixed $object
      * @return array<mixed>
      */
     private function convertToArray($object): array
     {
-        return (array) $this->normalizer->normalize($object);
+        return (array)$this->normalizer->normalize($object);
     }
 
     /**
@@ -221,7 +215,7 @@ class MessengerContext implements Context
         $fullName = 'messenger.transport.' . $transportName;
         $hasTransport = $this->container->has($fullName);
 
-        if ($hasTransport === false) {
+        if (false === $hasTransport) {
             throw new Exception('Transport ' . $fullName . ' not found');
         }
 
@@ -232,6 +226,7 @@ class MessengerContext implements Context
         }
 
         if (\class_exists(TestTransport::class) && $transport instanceof TestTransport) {
+            // @phpstan-ignore-next-line-error
             return $transport;
         }
 
