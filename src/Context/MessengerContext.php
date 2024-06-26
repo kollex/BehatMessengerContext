@@ -8,18 +8,14 @@ use BehatMessengerContext\Context\Traits\ArraySimilarTrait;
 use Behat\Behat\Context\Context;
 use Behat\Gherkin\Node\PyStringNode;
 use Exception;
-use SimilarArrays\SimilarArray;
 use Symfony\Component\DependencyInjection\ContainerInterface;
-// @todo not sure which namesapce is correct
 use Symfony\Component\Messenger\Transport\InMemory\InMemoryTransport;
-use Symfony\Component\Messenger\Transport\InMemoryTransport;
 use Symfony\Component\Messenger\Transport\TransportInterface;
 use Symfony\Component\Serializer\Normalizer\NormalizerInterface;
 use Zenstruck\Messenger\Test\Transport\TestTransport;
 
-class MessengerContext extends SimilarArray implements Context
+class MessengerContext implements Context
 {
-    // @todo remove trait but verify diff about placeholderPatternMap
     use ArraySimilarTrait;
 
     private ContainerInterface $container;
